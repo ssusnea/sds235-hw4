@@ -11,5 +11,18 @@ IDS0407 <- read_csv("hw4-data/IDS-0407.csv")
 IDS0406 |> 
   group_by(xref) |> 
   count(xref) |> View()
+
+IDS0406 |> 
+  group_by(sourcePort) |> 
+  count(sourcePort) |> View()
+
+# 6667 shows up the most often? 
+
+IDS0406 |> 
+  group_by(classification) |> 
+  count(classification) |> View()
+
+# Potentially Bad Traffic, Attempted Information Leak, Potential Corporate Privacy Violation
 ```
 
+we will assume that if an IP shows up that's not in the system, that would be bad
