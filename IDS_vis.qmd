@@ -1,0 +1,15 @@
+
+```{r}
+library(tidyverse)
+
+IDS0406 <- read_csv("hw4-data/IDS-0406.csv")
+IDS0407 <- read_csv("hw4-data/IDS-0407.csv")
+```
+
+```{r}
+# interested to see the number of different websites visited and how many times each one appears in the data. 
+IDS0406 |> 
+  group_by(xref) |> 
+  count(xref) |> View()
+```
+
