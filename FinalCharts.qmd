@@ -1,0 +1,115 @@
+---
+title: "Final Code"
+format: pdf
+---
+
+```{r, echo = FALSE}
+library(tidyverse)
+
+IDS0406 <- read_csv("IDS-0406.csv")
+IDS0407 <- read_csv("IDS-0407.csv")
+
+traffic_time_0406 <- IDS0406
+traffic_time_0407 <- IDS0407
+
+traffic_time_0406$time <- as.POSIXct(traffic_time_0406$time, format = "%m/%d/%Y %H")
+traffic_time_0407$time <- as.POSIXct(traffic_time_0407$time, format = "%m/%d/%Y %H")
+```
+
+
+
+
+```{r, echo = FALSE}
+#Visualization showing traffic overtime by classification
+
+traffic_time <- rbind(traffic_time_0406, traffic_time_0407) |>
+  group_by(time, classification) |>
+  summarize(total = n()) |>
+  ungroup()
+
+traffic_time$classification <- factor(traffic_time$classification, levels = c("Generic Protocol Command Decode", "Misc activity", "Potential Corporate Privacy Violation", "Attempted Information Leak", "Potentially Bad Traffic"))
+
+
+
+ggplot(traffic_time, aes(x = time, y = total, fill = classification)) +
+  geom_area(position = "stack") +
+  scale_x_datetime(date_labels = "%m/%d %H:%M") +
+  labs(fill = "Traffic Classification", y = "Number of Operations", x = "Time (1 hour intervals)", title = "Traffic Over Time by Classification", subtitle = "From April 05, 2012 17:00 to April 07, 2012 08:00") +
+  scale_fill_manual(values = c("Generic Protocol Command Decode" = rgb(102, 187, 106, maxColorValue = 255), "Misc activity" = rgb(77, 200, 172, maxColorValue = 255), "Potential Corporate Privacy Violation" = rgb(255, 193, 7,maxColorValue = 255), "Attempted Information Leak" = rgb(255, 100, 12, maxColorValue = 255), "Potentially Bad Traffic" = rgb(220, 53, 69, maxColorValue = 255)))
+```
+
+
+
+
+```{r, echo = FALSE}
+#Visualization showing traffic overtime by classification
+
+
+bad_traffic_time <- rbind(traffic_time_0406, traffic_time_0407) |>
+  filter(classification == "Potential Corporate Privacy Violation" | classification == "Attempted Information Leak" | classification == "Potentially Bad Traffic") |>
+  group_by(time, classification) |>
+  summarize(total = n()) |>
+  ungroup()
+
+bad_traffic_time$classification <- factor(bad_traffic_time$classification, levels = c("Generic Protocol Command Decode", "Misc activity", "Potential Corporate Privacy Violation", "Attempted Information Leak", "Potentially Bad Traffic"))
+
+
+
+ggplot(bad_traffic_time, aes(x = time, y = total, fill = classification)) +
+  geom_area(position = "stack") +
+  scale_x_datetime(date_labels = "%m/%d %H:%M") +
+  labs(fill = "Traffic Classification", y = "Number of Operations", x = "Time (1 hour intervals)", title = "Potentially Bad Traffic Over Time", subtitle = "Sorted by traffic classification") +
+  scale_fill_manual(values = c("Generic Protocol Command Decode" = rgb(102, 187, 106, maxColorValue = 255), "Misc activity" = rgb(77, 200, 172, maxColorValue = 255), "Potential Corporate Privacy Violation" = rgb(255, 193, 7,maxColorValue = 255), "Attempted Information Leak" = rgb(255, 100, 12, maxColorValue = 255), "Potentially Bad Traffic" = rgb(220, 53, 69, maxColorValue = 255)))
+```
+
+
+
+
+```{r}
+#Visualization showing number of bad traffic attempts by source IP addresses
+bad_traffic_ip <- IDS0406 |> 
+  filter(classification == "Attempted Information Leak" | classification == "Potentially Bad Traffic") |>
+  group_by(sourceIP, classification) |>
+  summarize(total = n())
+
+
+ggplot(bad_traffic_ip, aes(x = sourceIP, y = total, fill = classification)) +
+  geom_col(position = 'dodge') +
+  labs(title = "Potentially Bad Traffic Count", subtitle = "Sorted by source IP address", fill = "Traffic Classification", y = "Number of Operations", x = "Source IP Address")
+```
+
+
+
+
+
+
+```{r, echo = FALSE}
+#Relevant views and searches
+
+
+IDS0406 |> 
+  filter(classification == "Attempted Information Leak" | classification == "Potentially Bad Traffic") |>
+  group_by(sourceIP) |> 
+  count(sourceIP) |> 
+  View()
+# Shows that the source IP addresses where attempted information leaks and potentially bad traffic originated from
+
+
+
+
+IDS0406 |> 
+  filter(classification == "Attempted Information Leak" | classification == "Potentially Bad Traffic") |>
+  group_by(destIP) |> 
+  count(destIP) |> 
+  View()
+# Shows the destination IP of every bad attempt. We found that the only destination IP is the Firewall interface to regional bank network.
+
+
+
+IDS0406 |>
+  filter(sourceIP == "172.23.231.69" | sourceIP == "172.23.232.4" | sourceIP == "172.23.234.58" | sourceIP == "172.23.236.8" | sourceIP == "172.23.240.156") |>
+  filter(classification != "Attempted Information Leak" & classification != "Potentially Bad Traffic") |>
+  View()
+# Shows what else the infected sourceIPs accessed. The only destination IP for each of these searches was the firewall IP.
+
+```
