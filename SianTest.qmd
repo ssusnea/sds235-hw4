@@ -1,0 +1,149 @@
+---
+title: "SianTest"
+format: pdf
+---
+
+```{r}
+library(tidyverse)
+
+IDS0406 <- read_csv("IDS-0406.csv")
+IDS0407 <- read_csv("IDS-0407.csv")
+```
+
+
+
+
+```{r}
+#Most relevant stuff!
+
+## Shows IPs
+IDS0406 |> 
+  filter(classification == "Attempted Information Leak" | classification == "Potentially Bad Traffic") |>
+  group_by(sourceIP) |> 
+  count(sourceIP) |> 
+  View()
+# these are originating from work stations
+
+IDS0406 |> 
+  filter(classification == "Attempted Information Leak" | classification == "Potentially Bad Traffic") |>
+  group_by(destIP) |> 
+  count(destIP) |> 
+  View()
+#Everything ends up at the dest ip of the Firewall interface to regional bank network so it probably wasn't able to get any information
+
+
+
+IDS0406 |>
+  filter(sourceIP == "172.23.231.69" | sourceIP == "172.23.232.4" | sourceIP == "172.23.234.58" | sourceIP == "172.23.236.8" | sourceIP == "172.23.240.156") |>
+  filter(classification != "Attempted Information Leak" & classification != "Potentially Bad Traffic") |>
+  View()
+#shows what else those sourceIPs accessed, everything ends up at the firewall IP so we good
+
+```
+
+
+```{r}
+bad_traffic_ip <- IDS0406 |> 
+  filter(classification == "Attempted Information Leak" | classification == "Potentially Bad Traffic") |>
+  group_by(sourceIP, classification) |>
+  summarize(total = n())
+
+
+
+bad_traffic_time <- IDS0406 |> 
+  filter(classification == "Attempted Information Leak" | classification == "Potentially Bad Traffic") |>
+  group_by(time, classification) |>
+  summarize(total = n())
+
+bad_traffic_time$time <- as.POSIXct(bad_traffic_time$time, format = "%m/%d/%Y %H:%M")
+
+
+
+
+
+#ggplot(bad_traffic_ip, aes(x = classification, y = total, fill = sourceIP)) +
+ # geom_col()
+
+
+ggplot(bad_traffic_ip, aes(x = sourceIP, y = total, fill = classification)) +
+  geom_col(position = 'dodge')
+
+
+ggplot(bad_traffic_time, aes(x = time, y = total, fill = classification)) +
+  geom_area() +
+  scale_x_datetime(date_labels = "%m/%d %H:%M") 
+
+
+  
+```
+
+
+
+
+
+
+
+
+
+
+```{r}
+#ARCHIVE
+# interested to see the number of different websites visited and how many times each one appears in the data. 
+IDS0406 |> 
+  group_by(xref) |> 
+  count(xref) |> View()
+
+
+
+IDS0406 |> 
+  group_by(sourcePort) |> 
+  count(sourcePort) |> View()
+
+# 6667 shows up the most often? 
+
+
+
+IDS0406 |> 
+  group_by(sourceIP) |> 
+  count(sourceIP) |> 
+  View()
+
+# 6667 shows up the most often? 
+
+
+
+
+
+
+##Shows Ports
+IDS0406 |> 
+  filter(classification == "Attempted Information Leak" | classification == "Potentially Bad Traffic") |>
+  group_by(sourcePort) |> 
+  count(sourcePort) |> 
+  View()
+#doesn't show us much
+
+IDS0406 |> 
+  filter(classification == "Attempted Information Leak" | classification == "Potentially Bad Traffic") |>
+  group_by(destPort) |> 
+  count(destPort) |> 
+  View()
+
+
+
+
+
+IDS0406 |> 
+  group_by(classification) |> 
+  count(classification) |> View()
+
+
+IDS0406 |> 
+  filter(classification == "Attempted Information Leak" | classification == "Potentially Bad Traffic") |>
+  group_by(sourceIP, classification) |>
+  summarize(total = n()) |>
+  View()
+
+# Potentially Bad Traffic, Attempted Information Leak, Potential Corporate Privacy Violation
+
+```
