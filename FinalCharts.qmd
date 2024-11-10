@@ -6,8 +6,8 @@ format: pdf
 ```{r, echo = FALSE}
 library(tidyverse)
 
-IDS0406 <- read_csv("hw4-data/IDS-0406.csv")
-IDS0407 <- read_csv("hw4-data/IDS-0407.csv")
+IDS0406 <- read_csv("IDS/IDS-0406.csv")
+IDS0407 <- read_csv("IDS/IDS-0407.csv")
 
 traffic_time_0406 <- IDS0406
 traffic_time_0407 <- IDS0407
