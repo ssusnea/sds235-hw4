@@ -9,7 +9,7 @@ This .zip file contains 6 files:
 
 
 Instructions:
-Please place all submitted files in the same directory so that the codes can be run. Also, please create a folder named `hw4-data` within the directory and put all csv data into this hw4-data folder (we did this because everyone has different folders and locations of data when they were downloaded).
+Please place all submitted files in the same directory, next to the data folders named `IDS` and `Firewall`, so that the codes can be run. 
 
 To run the Python code, open the Firewall_vis.ipynb file in Visual Studio Code or Jupyter Notebook. It is recommended to have your window wider to have a better viewing experience. Install all the packages in the terminal using “pip install package-name”. Then, you will be able to run all Python codes and see the data wrangling sections and their visualizations.
 
